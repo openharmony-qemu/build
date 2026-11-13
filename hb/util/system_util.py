@@ -17,6 +17,7 @@
 #
 
 import os
+import platform
 import re
 import subprocess
 import copy
@@ -28,6 +29,22 @@ from util.io_util import IoUtil
 from util.log_util import LogUtil
 from hb.helper.no_instance import NoInstance
 from containers.status import throw_exception
+
+
+def _qemu_host_gn_command(cmd):
+    if (not isinstance(cmd, (list, tuple)) or not cmd or
+            not isinstance(cmd[0], str) or
+            not cmd[0].endswith('/prebuilts/build-tools/linux-x86/bin/gn')):
+        return cmd
+    mode = os.environ.get('QEMU_HOST_GN_QEMU_USER', '0')
+    if mode not in ('0', '1'):
+        raise ValueError('QEMU_HOST_GN_QEMU_USER must be 0 or 1')
+    if mode == '0':
+        return cmd
+    if (platform.system().lower() != 'linux' or
+            platform.machine().lower() not in ('x86_64', 'amd64')):
+        raise ValueError('explicit GN CPU execution requires Linux x86_64')
+    return ['/usr/bin/qemu-x86_64-static', '-cpu', 'max'] + list(cmd)
 
 
 class HandleKwargs(metaclass=NoInstance):
@@ -105,6 +122,7 @@ class SystemUtil(metaclass=NoInstance):
         HandleKwargs.set_log_stage(custom_kwargs)
         HandleKwargs.update_filter_status(log_mode, custom_kwargs)
         cmd = HandleKwargs.remove_useless_space(cmd)
+        cmd = _qemu_host_gn_command(cmd)
 
         if not os.path.exists(os.path.dirname(log_path)):
             os.makedirs(os.path.dirname(log_path), exist_ok=True)

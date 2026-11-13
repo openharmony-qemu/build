@@ -546,6 +546,13 @@ template("ohos_app") {
                              "compatible_version",
                              "test_type",
                            ])
+    if (defined(invoker.strict_hap_list) && invoker.strict_hap_list) {
+      assert(defined(invoker.hap_list),
+             "strict_hap_list requires an explicit hap_list")
+      assert(invoker.hap_list != [],
+             "strict_hap_list requires a nonempty hap_list")
+      strict_hap_list = true
+    }
     unsigned_hap_path_list = _unsigned_hap_path_list
     deps = [
       ":$_compile_app_target",

@@ -519,6 +519,9 @@ template("app_sign") {
   if (defined(invoker.hap_list)) {
     sign_variables += [ "hap_list" ]
   }
+  if (defined(invoker.strict_hap_list)) {
+    sign_variables += [ "strict_hap_list" ]
+  }
   action(target_name) {
     forward_variables_from(invoker, sign_variables)
     _sign_hap_py_path = "//build/scripts/app_sign.py"
@@ -592,6 +595,12 @@ template("app_sign") {
         "--hap-list",
         rebase_path(hap_list, root_build_dir),
       ]
+    }
+    if (defined(strict_hap_list) && strict_hap_list) {
+      assert(defined(hap_list),
+             "strict_hap_list requires an explicit hap_list")
+      inputs += [ hap_list ]
+      args += [ "--strict-hap-list" ]
     }
 
     if (defined(sign_hap_py_path)) {

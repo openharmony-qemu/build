@@ -9,6 +9,11 @@ import("//build/misc/overrides/build.gni")
 import("//build/ohos_var.gni")
 import("//build/toolchain/toolchain.gni")
 
+_qemu_cfi_lto_flag = "-flto"
+if (is_ohos && qemu_thin_cfi) {
+  _qemu_cfi_lto_flag = "-flto=thin"
+}
+
 # Contains the dependencies needed for sanitizers to link into executables and
 # shared_libraries.
 group("deps") {
@@ -631,7 +636,7 @@ config("cfi_config_release") {
 
     configs = [ "//build/config/gcc:symbol_visibility_default" ]
     cflags = [
-      "-flto",
+      _qemu_cfi_lto_flag,
       "-fsanitize=cfi",
       "-fsanitize-blacklist=" +
           rebase_path(_cfi_blocklist_path, root_build_dir),
@@ -672,7 +677,7 @@ config("cfi_cross_dso_release") {
   configs = [ ":cfi_config_release" ]
   cflags = [ "-fsanitize-cfi-cross-dso" ]
   ldflags = [
-    "-flto",
+    _qemu_cfi_lto_flag,
     "-fsanitize=cfi",
     "-fsanitize-cfi-cross-dso",
   ]

@@ -118,6 +118,10 @@ declare_args() {
   # The global switch of cfi debug mode.
   cfi_debug = false
 
+  # QEMU retains CFI while using bounded ThinLTO instead of monolithic LTO.
+  # Other products preserve their existing full-LTO CFI configuration.
+  qemu_thin_cfi = false
+
   # Policy of security-related compilation configs, based on device performance.
   #   "high":     High-load security policy enabled. Suitable for High-performance devices.
   #   "standard": Standard security policy enabled. Suitable for Mid-performance devices.
